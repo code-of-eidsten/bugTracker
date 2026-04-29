@@ -72,6 +72,7 @@ function searchErrorsHtml() {
     <input 
       type="text" 
       placeholder="Søk etter feil..." 
+      value="${model.inputs.searchQuery}"
       onchange = "updateSearch(this.value)"
     />
     ${createFilteredErrorList()}
@@ -81,31 +82,24 @@ function searchErrorsHtml() {
 }
 
 function createFilteredErrorList() {
+  //  // lage en egen instanse av errorsene, så ikke vi klusser i selve modellen
+  let list = [...model.data.errors];
+
+  //Filtrer i vei! (om det er tekst i searchbaren)
+  if (model.inputs.searchQuery) {
+    const query = model.inputs.searchQuery.toLowerCase();
+    list = list.filter(error =>
+      error.title.toLowerCase().includes(query) ||
+      error.description.toLowerCase().includes(query)
+    );
+  }
+
   let html = '';
-  let errorsToShow = [];
-  for (let i = 0; i < model.data.errors.length; i++) {
-    let error = model.data.errors[i];
-
-    //matcher søketekst?
-    let searchMatch = error.title.toLowerCase().includes(
-      model.inputs.searchQuery.toLowerCase()) || error.description.toLowerCase().includes(model.inputs.searchQuery.toLowerCase());
-
-    //Matcher status?
-    let statusMatch = model.inputs.filterStatus === 'all' || error.status === model.inputs.filterStatus;
-
-    if (searchMatch && statusMatch) {
-      errorsToShow.push(error)
-    }
-
+  for (let error of list) {
+    html += errorCardHtml(error);
   }
+  return html || '<p>Ingen feil matcher søket, prøv igjen! </p>'; //litt feedback om man ikke finner noen match
 
-  //lage HTML (dratt ut i egen funksjon - litt mer DRY )
-  for (let error of errorsToShow) {
-    console.log("error filtered: ", error)
-    html += errorCardHtml(error)
-
-  }
-  return html;
 }
 
 function errorCardHtml(error) {
