@@ -1,5 +1,3 @@
-console.log("controller loaded!")
-
 function selectPage(page) {
   model.app.page = page;
   updateView()
@@ -35,7 +33,8 @@ function addNewError() {
     description: inputs.description,
     severity: inputs.severity || 'low', // Default til low hvis ikke valgt noe
     personId: inputs.personId,
-    status: 'open' // Alle nye starter som åpne !
+    status: 'open', // Alle nye starter som åpne !
+    priority: inputs.priority
   }
 
   // Push inn ny error i modellen
@@ -96,5 +95,18 @@ function deleteError(id) {
 function setFilterStatus(status) {
   console.log("status filter satt: ", status)
   model.inputs.filterStatus = status;
+  updateView();
+}
+
+//egen addition: sort etter priority
+function sortByPriority() {
+  // Hvis den allerede er 'priority', setter vi den til 'none' (for å slå av sorting)
+  // Hvis ikke, setter vi den til 'priority'
+  if (model.inputs.sortBy === 'priority') {
+    model.inputs.sortBy = 'none';
+  } else {
+    model.inputs.sortBy = 'priority';
+  }
+
   updateView();
 }

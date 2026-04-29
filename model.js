@@ -9,10 +9,11 @@ const model = {
       title: '',
       description: '',
       priority: '',
-      personId: null
+      personId: null,
+      priority: ''
     },
     filterStatus: 'alle',
-    sortBy: 'priority'  //Ekstraoppgave - knapp som sorterer etter prioritet
+    sortBy: 'none'  //Ekstraoppgave - knapp som sorterer etter prioritet
   },
 
   data: {
@@ -24,14 +25,24 @@ const model = {
     errors: [
       {
         id: 1,
+        title: "Feil på bilde på profil",
+        description: "Blir broken link på profilbildet mitt.",
+        severity: "medium",
+        status: "open",
+        personId: 1,
+        priority: "low"
+      },
+      {
+        id: 2,
         title: "Login bug",
         description: "Error når du sender inn pålogging skjema",
         severity: "high",
         status: "open",
         personId: 1,
+        priority: "high"
       },
       {
-        id: 2,
+        id: 3,
         title: "Layout på mobilen",
         description: "Layout funker ikke på mobilen",
         severity: "low",
