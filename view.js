@@ -82,15 +82,15 @@ function searchErrorsHtml() {
 }
 
 function createFilteredErrorList() {
-  //  // lage en egen instanse av errorsene, så ikke vi klusser i selve modellen
+  // lage en egen instanse av errorsene, så ikke vi klusser i selve modellen
   let list = [...model.data.errors];
 
   //Filtrer i vei! (om det er tekst i searchbaren)
   if (model.inputs.searchQuery) {
-    const query = model.inputs.searchQuery.toLowerCase();
+    const queryTxt = model.inputs.searchQuery.toLowerCase();
     list = list.filter(error =>
-      error.title.toLowerCase().includes(query) ||
-      error.description.toLowerCase().includes(query)
+      error.title.toLowerCase().includes(queryTxt) ||
+      error.description.toLowerCase().includes(queryTxt)
     );
   }
 
