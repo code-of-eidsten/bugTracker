@@ -1,6 +1,7 @@
 const model = {
   app: {
     page: "overview",
+    errorMsg: '',
   },
   inputs: {
     searchQuery: '',
@@ -10,7 +11,7 @@ const model = {
       priority: '',
       personId: null
     },
-    filterStatus: 'all',
+    filterStatus: 'alle',
     sortBy: 'priority'  //Ekstraoppgave - knapp som sorterer etter prioritet
   },
 
@@ -28,7 +29,6 @@ const model = {
         severity: "high",
         status: "open",
         personId: 1,
-        priority: "high"
       },
       {
         id: 2,

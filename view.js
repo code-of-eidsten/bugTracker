@@ -10,15 +10,24 @@ function overViewHtml() {
   let html = /*HTML*/ `
     <h2>Oversikt</h2>
     <div class="filter-group">
-      <button>Alle</button>
-      <button>Open</button>
-      <button>Closed</button>
+      <button onclick="setFilterStatus('alle')">Alle</button>
+      <button onclick="setFilterStatus('open')">Open</button>
+      <button onclick="setFilterStatus('closed')">Closed</button>
     </div>
   `;
+  if (model.inputs.filterStatus !== 'alle') { //om et statusfilter er satt, vis de med den statusen
+    let filteredList = model.data.errors;
+    filteredList = filteredList.filter(error => error.status === model.inputs.filterStatus);
+    for (let err of filteredList) {
+      html += `${errorCardHtml(err)}`
+    }
+  }
+  else {
+    for (let error of model.data.errors) {
+      //const person = model.data.persons.find((p) => p.id == error.personId);
+      html += `${errorCardHtml(error)}`
+    }
 
-  for (let error of model.data.errors) {
-    const person = model.data.persons.find((p) => p.id == error.personId);
-    html += `${errorCardHtml(error)}`
   }
 
   return html;
@@ -82,7 +91,7 @@ function createFilteredErrorList() {
 
   }
 
-  //lage HTML (dra ut i egen funksjon?)
+  //lage HTML (dratt ut i egen funksjon - litt mer DRY )
   for (let error of errorsToShow) {
     console.log("error filtered: ", error)
     html += errorCardHtml(error)
@@ -92,7 +101,7 @@ function createFilteredErrorList() {
 }
 
 function errorCardHtml(error) {
-  //Finn name på personen ut fra ID'en
+  //Finn name på personen ut fra ID'en - finnes ingen så forblir navnet "uoppgitt"
   let personName = 'Uoppgitt';
   for (let i = 0; i < model.data.persons.length; i++) {
     if (model.data.persons[i].id === error.personId) {
@@ -103,8 +112,8 @@ function errorCardHtml(error) {
 
   //sjekke status for å bestemme om delete knappen skal være aktiv eller ikke
   const slettDisabled = error.status !== 'closed' ? 'disabled' : '';
-  //spytt ut HTML
 
+  //spytt ut HTML
   return `
         <div class="error-card">
             <h3>${error.title}</h3>
@@ -119,12 +128,12 @@ function errorCardHtml(error) {
            </div>
 
             <hr>
-             <button ${slettDisabled} onclick="deleteError()">Slett</button>
+             <button ${slettDisabled} class="${error.status !== 'closed' ? 'delete-btn-disabled' : ''}" onclick="deleteError(${error.id})">Slett</button>
          
-            <button onclick="toggleStatus(${error.id})">
+            <button onclick="changeStatus(${error.id})">
                 ${error.status === 'open' ? 'Merk som closed' : 'Merk som open'}
             </button>
-
+            <p class="severity-high">${model.app.errorMsg}</p>
         </div>
     `;
 }
@@ -133,21 +142,28 @@ function addErrorsHtml() {
   return /*HTML*/ `
     <h2>Legg til en feil</h2>
     <div class="add-error-form">
-      <input type="text" placeholder="Tittel"/>
-      <textarea style="resize:none" placeholder="Beskriv feilen"></textarea>
+      <input type="text" placeholder="Tittel"  
+        oninput="updateNewErrorField('title', this.value)" 
+        value="${model.inputs.newError.title || ''}"
+      />
+      <textarea style="resize:none" placeholder="Beskriv feilen" 
+        oninput="updateNewErrorField('description', this.value)">
+        ${model.inputs.newError.description || ''}
+      </textarea>
+
       <label>Alvorlighetsgrad:</label>
-      <select>
+      <select onchange="updateNewErrorField('severity', this.value)">
         <option value="">-- Velg --</option>
-        <option value="low">Low</option>
-        <option value="medium">Medium</option>
-        <option value="high">High</option>
+        <option value="low" ${model.inputs.newError.severity === 'low' ? 'selected' : ''}>Low</option>
+        <option value="medium" ${model.inputs.newError.severity === 'medium' ? 'selected' : ''}>Medium</option>
+        <option value="high" ${model.inputs.newError.severity === 'high' ? 'selected' : ''}>High</option>
       </select>
       <label>Ansvarlig:</label>
-      <select>
+      <select onchange="updateNewErrorField('personId', this.value)">
         <option value="">-- Ikke satt --</option>
         ${model.data.persons.map((p) => `<option value="${p.id}">${p.name}</option>`).join("")}
       </select>
-      <button>Lagre</button>
+      <button onclick="addNewError()">Lagre</button>
     </div>
   `;
 }

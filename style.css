@@ -103,6 +103,11 @@ select {
   background-color: #c1121f;
 }
 
+.delete-btn-disabled:hover {
+    cursor: not-allowed; 
+    opacity: 0.5; 
+}
+
 .add-error-form {
   display: flex;
   flex-direction: column;
