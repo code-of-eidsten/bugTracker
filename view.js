@@ -18,26 +18,7 @@ function overViewHtml() {
 
   for (let error of model.data.errors) {
     const person = model.data.persons.find((p) => p.id == error.personId);
-    html += /*HTML*/ `
-        <div class="error-card">
-          <h3>${error.title}</h3>
-          <p>Description: ${error.description}</p>
-          <p>
-            Assigned: 
-            <b>${person ? person.name : "Ikke satt"}</b>
-          </p>
-          <p class="severity-${error.severity}">
-            Severity: ${error.severity}
-          </p>
-          <p>
-            Status: ${error.status}
-          </p>
-          <button onclick="deleteError()">Slett</button>
-          <button onclick="toggleStatus()">
-           ${error.status === "open" ? "Merk som closed" : "Merk som open"}
-        </button>
-        </div>
-      `;
+    html += `${errorCardHtml(error)}`
   }
 
   return html;
@@ -68,14 +49,84 @@ function renderPage() {
 }
 
 function searchErrorsHtml() {
+
   let html = /*HTML*/ `
     <h2>Søk</h2>
     <input 
       type="text" 
       placeholder="Søk etter feil..." 
+      onchange = "updateSearch(this.value)"
     />
+    ${createFilteredErrorList()}
   `;
+  console.log(model.inputs.searchQuery)
   return html;
+}
+
+function createFilteredErrorList() {
+  let html = '';
+  let errorsToShow = [];
+  for (let i = 0; i < model.data.errors.length; i++) {
+    let error = model.data.errors[i];
+
+    //matcher søketekst?
+    let searchMatch = error.title.toLowerCase().includes(
+      model.inputs.searchQuery.toLowerCase()) || error.description.toLowerCase().includes(model.inputs.searchQuery.toLowerCase());
+
+    //Matcher status?
+    let statusMatch = model.inputs.filterStatus === 'all' || error.status === model.inputs.filterStatus;
+
+    if (searchMatch && statusMatch) {
+      errorsToShow.push(error)
+    }
+
+  }
+
+  //lage HTML (dra ut i egen funksjon?)
+  for (let error of errorsToShow) {
+    console.log("error filtered: ", error)
+    html += errorCardHtml(error)
+
+  }
+  return html;
+}
+
+function errorCardHtml(error) {
+  //Finn name på personen ut fra ID'en
+  let personName = 'Uoppgitt';
+  for (let i = 0; i < model.data.persons.length; i++) {
+    if (model.data.persons[i].id === error.personId) {
+      personName = model.data.persons[i].name;
+      break;
+    }
+  }
+
+  //sjekke status for å bestemme om delete knappen skal være aktiv eller ikke
+  const slettDisabled = error.status !== 'closed' ? 'disabled' : '';
+  //spytt ut HTML
+
+  return `
+        <div class="error-card">
+            <h3>${error.title}</h3>
+            <p>${error.description}</p>
+            
+         <div>
+            <p><strong>Assigned: ${personName}</strong></p>
+            <p class="severity-${error.severity}">
+            <strong>Severity: ${error.severity}</strong>
+            </p>
+            <p>Status: ${error.status}</p>     
+           </div>
+
+            <hr>
+             <button ${slettDisabled} onclick="deleteError()">Slett</button>
+         
+            <button onclick="toggleStatus(${error.id})">
+                ${error.status === 'open' ? 'Merk som closed' : 'Merk som open'}
+            </button>
+
+        </div>
+    `;
 }
 
 function addErrorsHtml() {
